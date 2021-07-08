@@ -24,8 +24,8 @@ public class Shortener {
 	private String shortUrlCode;
 	
 	@Column(name="original_url")
-	@NotNull(message = "stringValue has to be present")
-	@NotEmpty(message = "stringValue has to be present")
+	@NotNull(message = "originalUrl has to be present")
+	@NotEmpty(message = "originalUrl has to be present")
 	private String originalUrl;
 	
 	@Column
