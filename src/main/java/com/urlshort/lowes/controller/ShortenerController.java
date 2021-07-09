@@ -2,6 +2,7 @@ package com.urlshort.lowes.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,20 +25,23 @@ public class ShortenerController {
 	private ShortenerBo shortenerBo;
 	
 	@RequestMapping(path="/create", method=RequestMethod.POST)
-	public ResponseEntity<String> create(@RequestBody Shortener shortener) {
+	public ResponseEntity<Shortener> create(@RequestBody Shortener shortener) {
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-		String message = Messages.FAILED;
+		Shortener s = null;
 		try {
-			message = shortenerBo.create(shortener);
-			if(message.equals(Messages.SUCCESS)) {
+			Map<String, Object> rsMap = shortenerBo.create(shortener);
+			if(rsMap.get("message").equals(Messages.SUCCESS)) {
 				status = HttpStatus.OK;
+				s = (Shortener) rsMap.get("data");
+			} else if(rsMap.get("message").equals(Messages.ORIGINAL_URL_INVALID) || rsMap.get("message").equals(Messages.ORIGINAL_URL_NOT_EMPTY)) {
+				status = HttpStatus.BAD_REQUEST;
 			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return new ResponseEntity<String>(message, status);
+		return new ResponseEntity<Shortener>(s, status);
 	}
 	
 	@RequestMapping(path="/list", method=RequestMethod.GET)
@@ -74,9 +78,6 @@ public class ShortenerController {
 		String message = Messages.FAILED;
 		try {
 			message = shortenerBo.updateCount(code);
-			if(message.equals(Messages.SUCCESS) || message.equals(Messages.NOT_FOUND)) {
-				status = HttpStatus.OK;
-			}
 			status = HttpStatus.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
